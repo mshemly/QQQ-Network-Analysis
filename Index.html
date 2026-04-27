@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MST Network · 90-Day · April 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0f1a;--surface:#111827;--surface2:#1a2236;--border:#1e2d45;
+  --accent:#38bdf8;--accent2:#f472b6;--text:#e2e8f0;--muted:#64748b;
+  --green:#34d399;--red:#f87171;--yellow:#fbbf24;--orange:#fb923c;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow-x:hidden}
+
+.hdr{background:linear-gradient(135deg,#0b0f1a,#0d1f3c 60%,#0a1628);
+  border-bottom:1px solid var(--border);padding:26px 36px 20px;position:relative}
+.hdr::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 50% 80% at 80% 50%,rgba(251,146,60,.06),transparent 70%);pointer-events:none}
+.hdr-row{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.hdr-label{font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:3px;
+  color:var(--orange);text-transform:uppercase;margin-bottom:7px}
+.hdr h1{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;
+  background:linear-gradient(135deg,#e2e8f0 30%,var(--orange));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.hdr-sub{color:var(--muted);font-size:.78rem}
+.chips{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
+.chip{font-family:'DM Mono',monospace;font-size:.67rem;border:1px solid var(--border);
+  border-radius:4px;padding:3px 8px;color:var(--muted)}
+.chip.warn{border-color:rgba(251,146,60,.4);color:var(--orange)}
+.kpis{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:7px;
+  padding:10px 14px;text-align:center;min-width:90px}
+.kpi-v{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:800}
+.kpi-l{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:1px;
+  text-transform:uppercase;color:var(--muted);margin-top:2px}
+
+.layout{display:grid;grid-template-columns:1fr 330px;height:calc(100vh - 155px);min-height:560px}
+
+.canvas-wrap{position:relative;overflow:hidden}
+canvas{position:absolute;inset:0}
+.hover-info{position:absolute;bottom:12px;left:12px;
+  font-family:'DM Mono',monospace;font-size:.64rem;color:var(--muted);
+  background:rgba(11,15,26,.88);border:1px solid var(--border);
+  border-radius:5px;padding:6px 10px;pointer-events:none;max-width:400px;line-height:1.5}
+.mode-bar{position:absolute;top:12px;left:12px;display:flex;
+  border:1px solid var(--border);border-radius:5px;overflow:hidden;z-index:10}
+.mbtn{font-family:'DM Mono',monospace;font-size:.67rem;letter-spacing:1px;
+  text-transform:uppercase;padding:5px 12px;cursor:pointer;border:none;
+  background:var(--surface);color:var(--muted);transition:all .2s}
+.mbtn.active{background:var(--orange);color:#0b0f1a;font-weight:700}
+.legend{position:absolute;bottom:12px;right:12px;
+  background:rgba(17,24,39,.93);border:1px solid var(--border);
+  border-radius:7px;padding:10px 13px}
+.leg-t{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:2px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.leg-r{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.leg-c{border-radius:50%;flex-shrink:0}
+.leg-l{font-size:.68rem;color:var(--muted)}
+
+.sidebar{background:var(--surface);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden}
+.tabs{display:flex;border-bottom:1px solid var(--border)}
+.tab{flex:1;padding:10px 4px;text-align:center;font-family:'DM Mono',monospace;
+  font-size:.63rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;
+  color:var(--muted);border-bottom:2px solid transparent;transition:all .2s}
+.tab.active{color:var(--orange);border-bottom-color:var(--orange)}
+.sc{flex:1;overflow-y:auto;padding:13px}
+.sc::-webkit-scrollbar{width:3px}
+.sc::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+.ni-name{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;margin-bottom:3px}
+.ni-sub{font-family:'DM Mono',monospace;font-size:.63rem;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.bar-wrap{margin:4px 0 11px}
+.bar-label{font-family:'DM Mono',monospace;font-size:.63rem;color:var(--muted);
+  margin-bottom:3px;display:flex;justify-content:space-between}
+.bar-track{background:var(--border);border-radius:2px;height:4px}
+.bar-fill{height:4px;border-radius:2px;transition:width .4s}
+.mrow{display:flex;justify-content:space-between;align-items:center;
+  padding:7px 0;border-bottom:1px solid var(--border)}
+.mrow:last-of-type{border-bottom:none}
+.ml{font-size:.74rem;color:var(--muted)}
+.mv{font-family:'DM Mono',monospace;font-size:.8rem;font-weight:500}
+.nb-title{font-family:'DM Mono',monospace;font-size:.63rem;letter-spacing:1px;
+  text-transform:uppercase;color:var(--muted);margin:13px 0 6px}
+.pill{display:inline-block;margin:2px;padding:3px 7px;
+  border:1px solid var(--border);border-radius:4px;
+  font-family:'DM Mono',monospace;font-size:.68rem;cursor:pointer;transition:all .2s}
+.pill:hover{border-color:var(--orange);color:var(--orange)}
+.no-sel{font-size:.78rem;color:var(--muted);text-align:center;margin-top:32px;line-height:1.9}
+
+.rank-sec{margin-bottom:16px}
+.rank-t{font-family:'DM Mono',monospace;font-size:.63rem;letter-spacing:2px;
+  text-transform:uppercase;margin-bottom:8px}
+.rank-row{display:flex;align-items:center;gap:6px;padding:5px 0;
+  border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.rank-row:hover{background:var(--surface2);margin:0 -13px;padding:5px 13px}
+.rn{font-family:'DM Mono',monospace;font-size:.63rem;color:var(--muted);width:14px}
+.rt{font-family:'DM Mono',monospace;font-size:.76rem;font-weight:500;flex:1}
+.rb{flex:2}.rbar{height:3px;border-radius:2px}
+.rs{font-family:'DM Mono',monospace;font-size:.66rem;color:var(--muted);width:36px;text-align:right}
+
+.badge{display:inline-block;padding:1px 6px;border-radius:3px;
+  font-family:'DM Mono',monospace;font-size:.62rem;font-weight:600;margin-left:4px}
+.b-both{background:rgba(251,191,36,.15);color:var(--yellow);border:1px solid rgba(251,191,36,.3)}
+.b-btwn{background:rgba(244,114,182,.15);color:var(--accent2);border:1px solid rgba(244,114,182,.3)}
+.b-cent{background:rgba(56,189,248,.15);color:var(--accent);border:1px solid rgba(56,189,248,.3)}
+.b-earn{background:rgba(251,146,60,.2);color:var(--orange);border:1px solid rgba(251,146,60,.4);font-size:.58rem}
+
+.callout{background:var(--surface2);border:1px solid var(--border);
+  border-left:3px solid var(--orange);border-radius:0 7px 7px 0;
+  padding:10px 12px;margin-bottom:12px;font-size:.74rem;color:var(--muted);line-height:1.7}
+.callout strong{color:var(--text)}
+
+.day-block{margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.day-label{font-family:'DM Mono',monospace;font-size:.66rem;color:var(--orange);
+  letter-spacing:1px;margin-bottom:7px}
+.day-note{font-size:.74rem;color:var(--muted);line-height:1.7;margin-top:6px}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-row">
+    <div>
+      <div class="hdr-label">90-Day Window · Most Recent</div>
+      <h1>MST Contagion Map · Apr 2026</h1>
+      <div class="hdr-sub">Dec 12 2025 → Apr 23 2026 · Current network heading into earnings week</div>
+      <div class="chips">
+        <span class="chip">90 trading days · 73 stocks</span>
+        <span class="chip warn">Avg Corr 0.1433 — dispersed, low systemic risk</span>
+        <span class="chip warn">CDNS tonight · NXPI Mon · Mag-7 Wed–Thu</span>
+      </div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-v" style="color:var(--accent2)">MCHP</div><div class="kpi-l">#1 Bridge</div></div>
+      <div class="kpi"><div class="kpi-v" style="color:var(--accent2)">NXPI</div><div class="kpi-l">#2 Bridge</div></div>
+      <div class="kpi"><div class="kpi-v" style="color:var(--yellow)">MCHP</div><div class="kpi-l">#1 Both</div></div>
+      <div class="kpi"><div class="kpi-v" style="color:var(--orange)">0.143</div><div class="kpi-l">Avg Corr</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="canvas-wrap">
+    <div class="mode-bar">
+      <button class="mbtn active" onclick="setMode('betweenness')">Betweenness</button>
+      <button class="mbtn" onclick="setMode('centrality')">Centrality</button>
+      <button class="mbtn" onclick="setMode('composite')">Composite</button>
+    </div>
+    <canvas id="c"></canvas>
+    <div class="hover-info" id="hoverInfo">Hover a node · Click to inspect · Scroll to zoom · Drag to pan</div>
+    <div class="legend">
+      <div class="leg-t">Node Color</div>
+      <div class="leg-r"><div class="leg-c" style="width:14px;height:14px;background:#fbbf24"></div><div class="leg-l">Top Both</div></div>
+      <div class="leg-r"><div class="leg-c" style="width:14px;height:14px;background:#f472b6"></div><div class="leg-l">Top Betweenness</div></div>
+      <div class="leg-r"><div class="leg-c" style="width:14px;height:14px;background:#38bdf8"></div><div class="leg-l">Top Centrality</div></div>
+      <div class="leg-r"><div class="leg-c" style="width:14px;height:14px;background:#334155;border:2px solid #fb923c"></div><div class="leg-l">Reports this week</div></div>
+      <div class="leg-r"><div class="leg-c" style="width:9px;height:9px;background:#334155"></div><div class="leg-l">Other</div></div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="tabs">
+      <div class="tab active" onclick="sw('inspect')">Inspect</div>
+      <div class="tab" onclick="sw('rankings')">Rankings</div>
+      <div class="tab" onclick="sw('paths')">Contagion</div>
+      <div class="tab" onclick="sw('week')">This Week</div>
+    </div>
+    <div class="sc" id="pInspect">
+      <div id="nodeInfo" style="display:none"></div>
+      <div class="no-sel" id="noSel">← Click any node<br>to inspect its position<br><br><span style="color:var(--orange);font-size:.7rem">Orange ring = reports this week</span></div>
+    </div>
+    <div class="sc" id="pRankings" style="display:none"><div id="rankCont"></div></div>
+    <div class="sc" id="pPaths" style="display:none"><div id="pathCont"></div></div>
+    <div class="sc" id="pWeek" style="display:none"><div id="weekCont"></div></div>
+  </div>
+</div>
+
+<script>
+const D = {"nodes": [{"id": "AAPL", "x": -0.016057155864823192, "y": 0.9911186066531356, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["CSX"]}, {"id": "ADBE", "x": 0.8125595282948835, "y": 0.4627539273961848, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["WDAY"]}, {"id": "ADP", "x": -0.6799404062343951, "y": -0.7410382778047311, "degree": 0.0278, "betweenness": 0.081, "composite": 0.0544, "neighbors": ["CTSH", "PAYX"]}, {"id": "ADSK", "x": -0.8579389902753354, "y": 0.5609730332927998, "degree": 0.0694, "betweenness": 0.3924, "composite": 0.2309, "neighbors": ["CDNS", "FTNT", "INTU", "LULU", "TTWO"]}, {"id": "AEP", "x": 0.35422541967246923, "y": 0.847278023467807, "degree": 0.0556, "betweenness": 0.0822, "composite": 0.0689, "neighbors": ["EXC", "MDLZ", "TMUS", "XEL"]}, {"id": "ALGN", "x": -0.7103831429108762, "y": 0.7871971566050481, "degree": 0.0694, "betweenness": 0.6103, "composite": 0.3399, "neighbors": ["CDNS", "CSCO", "IDXX", "MAR", "SBUX"]}, {"id": "AMD", "x": 0.7863798723447271, "y": -0.6228582254049595, "degree": 0.0417, "betweenness": 0.0552, "composite": 0.0484, "neighbors": ["EA", "INTC", "NVDA"]}, {"id": "AMGN", "x": -0.8185947304677197, "y": -0.5515414352893743, "degree": 0.0278, "betweenness": 0.0548, "composite": 0.0413, "neighbors": ["REGN", "VRTX"]}, {"id": "AMZN", "x": -0.37574595575338715, "y": 0.7514007853549091, "degree": 0.0278, "betweenness": 0.0278, "composite": 0.0278, "neighbors": ["GOOGL", "META"]}, {"id": "AVGO", "x": 0.282790458920581, "y": -0.8550310516876083, "degree": 0.0278, "betweenness": 0.0278, "composite": 0.0278, "neighbors": ["MRVL", "NVDA"]}, {"id": "BIIB", "x": 0.3686118989773802, "y": -0.9079802161231181, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["VRTX"]}, {"id": "BKNG", "x": -0.8276507922693067, "y": -0.39823124074244404, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["CTSH"]}, {"id": "BKR", "x": -0.11102542685798786, "y": 0.9279374875733952, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["MCHP"]}, {"id": "CDNS", "x": -0.8892798124603872, "y": 0.2763184777150843, "degree": 0.0417, "betweenness": 0.421, "composite": 0.2313, "neighbors": ["ADSK", "ALGN", "SNPS"]}, {"id": "COST", "x": 0.24870801686476812, "y": -0.9765883309440853, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["MDLZ"]}, {"id": "CPRT", "x": 0.5133136827576801, "y": -0.8165768357537544, "degree": 0.0417, "betweenness": 0.0552, "composite": 0.0484, "neighbors": ["CTAS", "NFLX", "PAYX"]}, {"id": "CSCO", "x": -0.5118499940685932, "y": 0.9032537184835582, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["ALGN"]}, {"id": "CSGP", "x": 0.9109904073800145, "y": 0.4987251777174475, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["CTSH"]}, {"id": "CSX", "x": -0.439729978090923, "y": -0.893353116654666, "degree": 0.0417, "betweenness": 0.2664, "composite": 0.154, "neighbors": ["AAPL", "KDP", "TXN"]}, {"id": "CTAS", "x": 0.8155975083810917, "y": -0.42575739382431493, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["CPRT"]}, {"id": "CTSH", "x": -0.9586376111142558, "y": 0.06557313450641264, "degree": 0.0417, "betweenness": 0.0552, "composite": 0.0484, "neighbors": ["ADP", "BKNG", "CSGP"]}, {"id": "DLTR", "x": -0.7934734619299292, "y": 0.6766285446066106, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["ROST"]}, {"id": "DXCM", "x": -0.6126402459352637, "y": 0.6859024946995427, "degree": 0.0417, "betweenness": 0.1804, "composite": 0.111, "neighbors": ["IDXX", "ILMN", "VRTX"]}, {"id": "EA", "x": 0.3670536370977485, "y": 0.6444390355951283, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["AMD"]}, {"id": "EBAY", "x": 0.14131674060703756, "y": -0.9473784656600859, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["TTWO"]}, {"id": "EXC", "x": 0.9852407073433448, "y": 0.29695973664744013, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["AEP"]}, {"id": "FAST", "x": 0.7312298663973182, "y": 0.7485311451601105, "degree": 0.0278, "betweenness": 0.0278, "composite": 0.0278, "neighbors": ["ODFL", "PCAR"]}, {"id": "FTNT", "x": 0.14910436469728247, "y": 0.9752167253629797, "degree": 0.0278, "betweenness": 0.0278, "composite": 0.0278, "neighbors": ["ADSK", "PANW"]}, {"id": "GILD", "x": -0.8974400262819269, "y": -0.45794881060559905, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["REGN"]}, {"id": "GOOGL", "x": -0.9750370449136224, "y": -0.21214303790142916, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["AMZN"]}, {"id": "HON", "x": -0.33719142701186466, "y": -0.867269380197673, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["PCAR"]}, {"id": "IDXX", "x": 0.9287910390919113, "y": -0.29905218723619487, "degree": 0.0417, "betweenness": 0.225, "composite": 0.1333, "neighbors": ["ALGN", "DXCM", "ISRG"]}, {"id": "ILMN", "x": -0.7323783879231412, "y": 0.5243797550230573, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["DXCM"]}, {"id": "INTC", "x": -0.5698996705443207, "y": 0.8042010373785748, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["AMD"]}, {"id": "INTU", "x": -0.38108718881014947, "y": 0.9658815638721959, "degree": 0.0556, "betweenness": 0.2727, "composite": 0.1641, "neighbors": ["ADSK", "PAYX", "VRSK", "WDAY"]}, {"id": "ISRG", "x": 0.6119662685490982, "y": -0.7782513387017493, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["IDXX"]}, {"id": "KDP", "x": -0.9635661990643405, "y": 0.35273995838551075, "degree": 0.0417, "betweenness": 0.225, "composite": 0.1333, "neighbors": ["CSX", "MDLZ", "MNST"]}, {"id": "KHC", "x": 0.5272404953351427, "y": 0.7881750606071481, "degree": 0.0278, "betweenness": 0.0278, "composite": 0.0278, "neighbors": ["MDLZ", "PEP"]}, {"id": "KLAC", "x": 0.4969413736383951, "y": -0.8950288333506744, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["LRCX"]}, {"id": "LRCX", "x": 0.051155796926229666, "y": -0.9704724104597252, "degree": 0.0417, "betweenness": 0.286, "composite": 0.1638, "neighbors": ["KLAC", "NVDA", "STX"]}, {"id": "LULU", "x": 0.9072240137222068, "y": 0.3645506785235338, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["ADSK"]}, {"id": "MAR", "x": -0.09244465093718371, "y": -0.9942995133726248, "degree": 0.0278, "betweenness": 0.5055, "composite": 0.2666, "neighbors": ["ALGN", "NXPI"]}, {"id": "MCHP", "x": -0.7051085920524991, "y": -0.5975097038962588, "degree": 0.0833, "betweenness": 0.6674, "composite": 0.3754, "neighbors": ["BKR", "NXPI", "PCAR", "SIRI", "STX", "TXN"]}, {"id": "MDLZ", "x": 0.6961210937645831, "y": 0.6253317552868818, "degree": 0.0556, "betweenness": 0.1835, "composite": 0.1195, "neighbors": ["AEP", "COST", "KDP", "KHC"]}, {"id": "META", "x": 0.9846315391077829, "y": -0.03595797362004408, "degree": 0.0278, "betweenness": 0.0548, "composite": 0.0413, "neighbors": ["AMZN", "NVDA"]}, {"id": "MNST", "x": -0.8779059761912014, "y": 0.4368568349523237, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["KDP"]}, {"id": "MRVL", "x": 0.9245529703469458, "y": 0.18725633189638113, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["AVGO"]}, {"id": "MSFT", "x": 0.9350164990636343, "y": -0.1388190872138795, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["SNPS"]}, {"id": "NFLX", "x": 0.8445778090934728, "y": 0.023564139305010643, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["CPRT"]}, {"id": "NVDA", "x": -0.7798610795225788, "y": -0.6974641895035978, "degree": 0.0833, "betweenness": 0.2574, "composite": 0.1704, "neighbors": ["AMD", "AVGO", "LRCX", "META", "TSLA", "WBD"]}, {"id": "NXPI", "x": -0.98042202508705, "y": 0.18468648694779277, "degree": 0.0417, "betweenness": 0.5207, "composite": 0.2812, "neighbors": ["MAR", "MCHP", "QCOM"]}, {"id": "ODFL", "x": -0.8370902013772009, "y": 0.09897754106838857, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["FAST"]}, {"id": "ORLY", "x": 0.8693125036423714, "y": -0.528594845007287, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["VRTX"]}, {"id": "PANW", "x": -0.28099131170844127, "y": 0.8843456879819671, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["FTNT"]}, {"id": "PAYX", "x": -0.5336155043297129, "y": -0.8613298880490928, "degree": 0.0417, "betweenness": 0.1827, "composite": 0.1122, "neighbors": ["ADP", "CPRT", "INTU"]}, {"id": "PCAR", "x": -0.5796658540850304, "y": -0.7842051802415586, "degree": 0.0556, "betweenness": 0.1342, "composite": 0.0949, "neighbors": ["FAST", "HON", "MCHP", "ROST"]}, {"id": "PEP", "x": 0.8214137827280604, "y": 0.6162669839946073, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["KHC"]}, {"id": "QCOM", "x": 0.2671603244663316, "y": 0.9371902275771734, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["NXPI"]}, {"id": "REGN", "x": 0.692978243557104, "y": -0.7238134970176789, "degree": 0.0278, "betweenness": 0.0278, "composite": 0.0278, "neighbors": ["AMGN", "GILD"]}, {"id": "ROST", "x": 0.9831825778366308, "y": 0.08698416106504726, "degree": 0.0278, "betweenness": 0.0278, "composite": 0.0278, "neighbors": ["DLTR", "PCAR"]}, {"id": "SBUX", "x": 0.44071826400956415, "y": 0.9071949535016652, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["ALGN"]}, {"id": "SIRI", "x": -0.2060006013710993, "y": -0.9651021871362284, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["MCHP"]}, {"id": "SNPS", "x": -0.9186742871378053, "y": -0.13854708824375023, "degree": 0.0278, "betweenness": 0.0278, "composite": 0.0278, "neighbors": ["CDNS", "MSFT"]}, {"id": "STX", "x": 0.6204703290798145, "y": 0.7943890767250249, "degree": 0.0278, "betweenness": 0.3001, "composite": 0.1639, "neighbors": ["LRCX", "MCHP"]}, {"id": "TMUS", "x": -1.0, "y": -0.03649128533243093, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["AEP"]}, {"id": "TSLA", "x": -0.06622923874456652, "y": -0.9373866815497692, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["NVDA"]}, {"id": "TTWO", "x": -0.9224907343147546, "y": -0.31814317337933307, "degree": 0.0278, "betweenness": 0.0278, "composite": 0.0278, "neighbors": ["ADSK", "EBAY"]}, {"id": "TXN", "x": 0.9893221663326245, "y": -0.218936970828023, "degree": 0.0278, "betweenness": 0.2817, "composite": 0.1547, "neighbors": ["CSX", "MCHP"]}, {"id": "VRSK", "x": 0.07607999075139753, "y": 0.9044708403786956, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["INTU"]}, {"id": "VRTX", "x": -0.2014673731383727, "y": 0.9819884284785841, "degree": 0.0556, "betweenness": 0.1338, "composite": 0.0947, "neighbors": ["AMGN", "BIIB", "DXCM", "ORLY"]}, {"id": "WBD", "x": 0.9422695105050808, "y": -0.42116066198846924, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["NVDA"]}, {"id": "WDAY", "x": 0.6753534403775721, "y": -0.5867480809228416, "degree": 0.0278, "betweenness": 0.0278, "composite": 0.0278, "neighbors": ["ADBE", "INTU"]}, {"id": "XEL", "x": -0.3120870628822359, "y": -0.9686281181421033, "degree": 0.0139, "betweenness": 0.0, "composite": 0.0069, "neighbors": ["AEP"]}], "edges": [{"source": "AAPL", "target": "CSX", "corr": 0.414}, {"source": "ADBE", "target": "WDAY", "corr": 0.749}, {"source": "ADP", "target": "CTSH", "corr": 0.742}, {"source": "ADP", "target": "PAYX", "corr": 0.858}, {"source": "ADSK", "target": "CDNS", "corr": 0.667}, {"source": "ADSK", "target": "FTNT", "corr": 0.605}, {"source": "ADSK", "target": "INTU", "corr": 0.762}, {"source": "ADSK", "target": "LULU", "corr": 0.456}, {"source": "ADSK", "target": "TTWO", "corr": 0.57}, {"source": "AEP", "target": "EXC", "corr": 0.78}, {"source": "AEP", "target": "MDLZ", "corr": 0.448}, {"source": "AEP", "target": "TMUS", "corr": 0.37}, {"source": "AEP", "target": "XEL", "corr": 0.735}, {"source": "ALGN", "target": "CDNS", "corr": 0.624}, {"source": "ALGN", "target": "CSCO", "corr": 0.428}, {"source": "ALGN", "target": "IDXX", "corr": 0.626}, {"source": "ALGN", "target": "MAR", "corr": 0.524}, {"source": "ALGN", "target": "SBUX", "corr": 0.454}, {"source": "AMD", "target": "EA", "corr": 0.523}, {"source": "AMD", "target": "INTC", "corr": 0.48}, {"source": "AMD", "target": "NVDA", "corr": 0.577}, {"source": "AMGN", "target": "REGN", "corr": 0.659}, {"source": "AMGN", "target": "VRTX", "corr": 0.567}, {"source": "AMZN", "target": "GOOGL", "corr": 0.574}, {"source": "AMZN", "target": "META", "corr": 0.562}, {"source": "AVGO", "target": "MRVL", "corr": 0.45}, {"source": "AVGO", "target": "NVDA", "corr": 0.671}, {"source": "BIIB", "target": "VRTX", "corr": 0.573}, {"source": "BKNG", "target": "CTSH", "corr": 0.574}, {"source": "BKR", "target": "MCHP", "corr": 0.367}, {"source": "CDNS", "target": "SNPS", "corr": 0.802}, {"source": "COST", "target": "MDLZ", "corr": 0.323}, {"source": "CPRT", "target": "CTAS", "corr": 0.5}, {"source": "CPRT", "target": "NFLX", "corr": 0.375}, {"source": "CPRT", "target": "PAYX", "corr": 0.57}, {"source": "CSGP", "target": "CTSH", "corr": 0.6}, {"source": "CSX", "target": "KDP", "corr": 0.509}, {"source": "CSX", "target": "TXN", "corr": 0.586}, {"source": "DLTR", "target": "ROST", "corr": 0.401}, {"source": "DXCM", "target": "IDXX", "corr": 0.519}, {"source": "DXCM", "target": "ILMN", "corr": 0.402}, {"source": "DXCM", "target": "VRTX", "corr": 0.401}, {"source": "EBAY", "target": "TTWO", "corr": 0.489}, {"source": "FAST", "target": "ODFL", "corr": 0.662}, {"source": "FAST", "target": "PCAR", "corr": 0.624}, {"source": "FTNT", "target": "PANW", "corr": 0.732}, {"source": "GILD", "target": "REGN", "corr": 0.585}, {"source": "HON", "target": "PCAR", "corr": 0.507}, {"source": "IDXX", "target": "ISRG", "corr": 0.624}, {"source": "INTU", "target": "PAYX", "corr": 0.696}, {"source": "INTU", "target": "VRSK", "corr": 0.565}, {"source": "INTU", "target": "WDAY", "corr": 0.806}, {"source": "KDP", "target": "MDLZ", "corr": 0.542}, {"source": "KDP", "target": "MNST", "corr": 0.419}, {"source": "KHC", "target": "MDLZ", "corr": 0.58}, {"source": "KHC", "target": "PEP", "corr": 0.539}, {"source": "KLAC", "target": "LRCX", "corr": 0.852}, {"source": "LRCX", "target": "NVDA", "corr": 0.579}, {"source": "LRCX", "target": "STX", "corr": 0.663}, {"source": "MAR", "target": "NXPI", "corr": 0.492}, {"source": "MCHP", "target": "NXPI", "corr": 0.862}, {"source": "MCHP", "target": "PCAR", "corr": 0.586}, {"source": "MCHP", "target": "SIRI", "corr": 0.299}, {"source": "MCHP", "target": "STX", "corr": 0.499}, {"source": "MCHP", "target": "TXN", "corr": 0.818}, {"source": "META", "target": "NVDA", "corr": 0.506}, {"source": "MSFT", "target": "SNPS", "corr": 0.626}, {"source": "NVDA", "target": "TSLA", "corr": 0.559}, {"source": "NVDA", "target": "WBD", "corr": 0.402}, {"source": "NXPI", "target": "QCOM", "corr": 0.559}, {"source": "ORLY", "target": "VRTX", "corr": 0.49}, {"source": "PCAR", "target": "ROST", "corr": 0.49}], "top_btwn": ["MCHP", "ALGN", "NXPI", "MAR", "CDNS", "ADSK", "STX", "LRCX", "TXN", "INTU"], "top_cent": ["MCHP", "ALGN", "NXPI", "MAR", "CDNS", "ADSK", "NVDA", "INTU", "STX", "LRCX"], "window": "Dec 12 2025 \u2192 Apr 23 2026", "avg_corr": 0.1433};
+
+const EARN = {
+  'CDNS':'Mon Apr 27 · tonight',
+  'NXPI':'Mon Apr 28 · after close',
+  'MSFT':'Wed Apr 29',
+  'GOOGL':'Wed Apr 29',
+  'META':'Wed Apr 29',
+  'AMZN':'Wed Apr 29',
+  'AAPL':'Thu Apr 30'
+};
+
+const bMax = Math.max(...D.nodes.map(n=>n.betweenness));
+const cMax = Math.max(...D.nodes.map(n=>n.composite));
+const dMax = Math.max(...D.nodes.map(n=>n.degree));
+const topB = new Set(D.top_btwn.slice(0,10));
+const topC = new Set(D.top_cent.slice(0,10));
+const topBoth = new Set([...topB].filter(x=>topC.has(x)));
+const earnSet = new Set(Object.keys(EARN));
+
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+let W,H,scale=1,ox=0,oy=0,drag=false,ds=null,do_=null,mode='betweenness',sel=null,hov=null;
+
+const xs=D.nodes.map(n=>n.x), ys=D.nodes.map(n=>n.y);
+const xMin=Math.min(...xs),xMax=Math.max(...xs),yMin=Math.min(...ys),yMax=Math.max(...ys);
+const PAD=72;
+
+function tc(nx,ny){
+  return [PAD+(nx-xMin)/(xMax-xMin)*(W-PAD*2)*scale+ox,
+          PAD+(ny-yMin)/(yMax-yMin)*(H-PAD*2)*scale+oy];
+}
+
+function col(n){
+  if(topBoth.has(n.id)) return '#fbbf24';
+  if(topB.has(n.id))    return '#f472b6';
+  if(topC.has(n.id))    return '#38bdf8';
+  return '#334155';
+}
+
+function rad(n){
+  let v = mode==='betweenness' ? n.betweenness/bMax :
+          mode==='centrality'  ? n.composite/cMax   :
+          (n.betweenness/bMax+n.composite/cMax)/2;
+  const imp = topBoth.has(n.id)||topB.has(n.id)||topC.has(n.id);
+  return (imp?7:earnSet.has(n.id)?5:4) + v*18;
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  // edges
+  D.edges.forEach(e=>{
+    const s=D.nodes.find(n=>n.id===e.source), t=D.nodes.find(n=>n.id===e.target);
+    if(!s||!t) return;
+    const [x1,y1]=tc(s.x,s.y), [x2,y2]=tc(t.x,t.y);
+    let a=0.1, w=0.7, c='100,116,139';
+    if(sel&&(sel.id===s.id||sel.id===t.id)){a=0.9;w=2;c='56,189,248';}
+    else if(hov&&(hov.id===s.id||hov.id===t.id)){a=0.6;w=1.4;c='251,146,60';}
+    else if(earnSet.has(s.id)||earnSet.has(t.id)){a=0.2;c='251,146,60';}
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+    ctx.strokeStyle=`rgba(${c},${a})`;ctx.lineWidth=w;ctx.stroke();
+  });
+  // nodes
+  D.nodes.forEach(n=>{
+    const [cx,cy]=tc(n.x,n.y);
+    const r=rad(n), c=col(n);
+    const isSel=sel&&sel.id===n.id;
+    const isNb=sel&&sel.neighbors.includes(n.id);
+    const isEarn=earnSet.has(n.id);
+    // glow
+    if(topBoth.has(n.id)||topB.has(n.id)||topC.has(n.id)||isSel||isEarn){
+      ctx.beginPath();ctx.arc(cx,cy,r+8,0,Math.PI*2);
+      const g=ctx.createRadialGradient(cx,cy,r,cx,cy,r+14);
+      g.addColorStop(0,isEarn?'rgba(251,146,60,.3)':`${c}44`);
+      g.addColorStop(1,'transparent');
+      ctx.fillStyle=g;ctx.fill();
+    }
+    // circle
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+    let a=0.88;
+    if(sel&&!isSel&&!isNb) a=0.15;
+    ctx.fillStyle=c+Math.round(a*255).toString(16).padStart(2,'0');
+    ctx.fill();
+    // earnings ring
+    if(isEarn){ctx.beginPath();ctx.arc(cx,cy,r+2.5,0,Math.PI*2);
+      ctx.strokeStyle='rgba(251,146,60,.95)';ctx.lineWidth=2;ctx.stroke();}
+    if(isSel){ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();}
+    else if(hov&&hov.id===n.id){ctx.strokeStyle=c+'cc';ctx.lineWidth=1.5;ctx.stroke();}
+    // label
+    const show=r>8||isSel||isNb||(hov&&hov.id===n.id)||topBoth.has(n.id)||topB.has(n.id)||topC.has(n.id)||isEarn;
+    if(show){
+      const fs=Math.max(9,Math.min(13,r+3));
+      ctx.font=`${isSel?'bold ':''}${fs}px 'DM Mono',monospace`;
+      ctx.textAlign='center';
+      ctx.fillStyle=isSel||(hov&&hov.id===n.id)?'#e2e8f0':
+        isEarn?'#fb923ccc':(sel&&!isNb?'#64748b33':'#cbd5e1cc');
+      ctx.fillText(n.id,cx,cy-r-4);
+    }
+  });
+}
+
+function nodeAt(mx,my){
+  for(const n of D.nodes){
+    const [cx,cy]=tc(n.x,n.y);
+    if((mx-cx)**2+(my-cy)**2<(rad(n)+5)**2) return n;
+  }
+  return null;
+}
+
+cv.addEventListener('mousemove',e=>{
+  const r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
+  if(drag){ox=do_[0]+(mx-ds[0]);oy=do_[1]+(my-ds[1]);draw();return;}
+  const n=nodeAt(mx,my); hov=n; cv.style.cursor=n?'pointer':'grab';
+  const et=n&&EARN[n.id]?' · 📅 '+EARN[n.id]:'';
+  document.getElementById('hoverInfo').textContent=n?
+    `${n.id}${et} · Betweenness ${n.betweenness.toFixed(4)} · Centrality ${n.composite.toFixed(4)}`:
+    'Hover a node · Click to inspect · Scroll to zoom · Drag to pan';
+  draw();
+});
+cv.addEventListener('mousedown',e=>{
+  const r=cv.getBoundingClientRect();
+  drag=true;ds=[e.clientX-r.left,e.clientY-r.top];do_=[ox,oy];
+});
+cv.addEventListener('mouseup',e=>{
+  const r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+  if(Math.abs(mx-ds[0])<4&&Math.abs(my-ds[1])<4){
+    const n=nodeAt(mx,my);sel=n===sel?null:n;
+    n?showInfo(n):hideInfo();
+  }
+  drag=false;draw();
+});
+cv.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+  const ns=Math.max(0.3,Math.min(5,scale*(e.deltaY>0?.85:1.18)));
+  ox=mx-(mx-ox)*ns/scale;oy=my-(my-oy)*ns/scale;scale=ns;draw();
+},{passive:false});
+
+function setMode(m){
+  mode=m;
+  document.querySelectorAll('.mbtn').forEach((b,i)=>b.classList.toggle('active',['betweenness','centrality','composite'][i]===m));
+  draw();
+}
+
+function showInfo(n){
+  sw('inspect');
+  document.getElementById('noSel').style.display='none';
+  const ni=document.getElementById('nodeInfo');
+  ni.style.display='block';
+  const bp=(n.betweenness/bMax*100).toFixed(1);
+  const cp=(n.composite/cMax*100).toFixed(1);
+  const dp=(n.degree/dMax*100).toFixed(1);
+  let badge='';
+  if(topBoth.has(n.id)) badge='<span class="badge b-both">Top Both</span>';
+  else if(topB.has(n.id)) badge='<span class="badge b-btwn">Top Bridge</span>';
+  else if(topC.has(n.id)) badge='<span class="badge b-cent">Top Hub</span>';
+  const eb=EARN[n.id]?`<span class="badge b-earn">📅 ${EARN[n.id]}</span>`:'';
+  const pills=n.neighbors.map(nb=>{
+    const ec=EARN[nb]?'style="border-color:rgba(251,146,60,.5);color:#fb923c"':'';
+    return `<span class="pill" ${ec} onclick="focusNode('${nb}')">${nb}${EARN[nb]?'🗓':''}</span>`;
+  }).join('');
+  const interp=topBoth.has(n.id)?
+    `<strong style="color:var(--yellow)">${n.id}</strong> ranks top-10 on both metrics — maximum contagion propagation risk. A shock here crosses cluster boundaries AND pulls direct neighbors simultaneously.`:
+    topB.has(n.id)?
+    `<strong style="color:var(--accent2)">${n.id}</strong> is a critical bridge. High betweenness means it sits on shortest paths between otherwise disconnected clusters. A breakdown here severs cross-cluster transmission even with few direct neighbors.`:
+    topC.has(n.id)?
+    `<strong style="color:var(--accent)">${n.id}</strong> is a well-connected hub — pulls its cluster with it but contagion stays more contained. Watch its direct neighbors for immediate 1-3 day repricing.`:
+    `${n.id} is peripheral in the current 90-day window. Lower bridge risk — less likely to be source or amplifier of broad contagion.`;
+  ni.innerHTML=`
+    <div class="ni-name">${n.id}${badge}${eb}</div>
+    <div class="ni-sub">90-Day · Dec 2025 → Apr 2026</div>
+    <div class="bar-wrap">
+      <div class="bar-label"><span>Betweenness <span style="color:#f472b6">Bridge</span></span><span style="color:#f472b6">${n.betweenness.toFixed(4)}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${bp}%;background:#f472b6"></div></div>
+    </div>
+    <div class="bar-wrap">
+      <div class="bar-label"><span>Composite <span style="color:#38bdf8">Hub</span></span><span style="color:#38bdf8">${n.composite.toFixed(4)}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${cp}%;background:#38bdf8"></div></div>
+    </div>
+    <div class="bar-wrap">
+      <div class="bar-label"><span>Degree <span style="color:#34d399">Connections</span></span><span style="color:#34d399">${n.degree.toFixed(4)}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${dp}%;background:#34d399"></div></div>
+    </div>
+    <div class="mrow"><span class="ml">Betweenness</span><span class="mv">${n.betweenness.toFixed(4)}</span></div>
+    <div class="mrow"><span class="ml">Degree</span><span class="mv">${n.degree.toFixed(4)}</span></div>
+    <div class="mrow"><span class="ml">Composite</span><span class="mv">${n.composite.toFixed(4)}</span></div>
+    <div class="mrow"><span class="ml">Neighbors</span><span class="mv">${n.neighbors.length}</span></div>
+    <div class="nb-title">Direct Neighbors <span style="color:var(--orange);font-size:.6rem">🗓 = reports this week</span></div>
+    ${pills}
+    <div class="nb-title" style="margin-top:12px">Interpretation</div>
+    <div style="font-size:.74rem;color:var(--muted);line-height:1.7">${interp}</div>`;
+}
+
+function hideInfo(){
+  document.getElementById('noSel').style.display='block';
+  document.getElementById('nodeInfo').style.display='none';
+}
+
+function focusNode(id){
+  const n=D.nodes.find(x=>x.id===id);
+  if(n){sel=n;showInfo(n);draw();}
+}
+
+function buildRankings(){
+  const sb=[...D.nodes].sort((a,b)=>b.betweenness-a.betweenness).slice(0,15);
+  const sc=[...D.nodes].sort((a,b)=>b.composite-a.composite).slice(0,15);
+  let h=`<div class="callout"><strong>Key 90d vs 252d shift:</strong> MCHP is the new #1 bridge — absent from the full-year top 10. MSFT, GOOGL, AAPL have near-zero betweenness in the 90d window — they have decoupled from the network core. Real contagion chain runs MCHP → NXPI → CDNS → ADSK → INTU.</div>`;
+  h+=`<div class="rank-sec"><div class="rank-t" style="color:#f472b6">Top 15 · Betweenness (Bridge Risk)</div>`;
+  sb.forEach((n,i)=>{
+    const p=(n.betweenness/bMax*100).toFixed(0);
+    const eb=EARN[n.id]?'<span class="badge b-earn" style="font-size:.55rem">📅</span>':'';
+    h+=`<div class="rank-row" onclick="focusNode('${n.id}')"><span class="rn">${i+1}</span><span class="rt">${n.id}${eb}</span><div class="rb"><div class="rbar" style="width:${p}%;background:#f472b6;opacity:.8"></div></div><span class="rs">${n.betweenness.toFixed(3)}</span></div>`;
+  });
+  h+=`</div><div class="rank-sec"><div class="rank-t" style="color:#38bdf8">Top 15 · Composite Centrality (Hub Strength)</div>`;
+  sc.forEach((n,i)=>{
+    const p=(n.composite/cMax*100).toFixed(0);
+    const eb=EARN[n.id]?'<span class="badge b-earn" style="font-size:.55rem">📅</span>':'';
+    h+=`<div class="rank-row" onclick="focusNode('${n.id}')"><span class="rn">${i+1}</span><span class="rt">${n.id}${eb}</span><div class="rb"><div class="rbar" style="width:${p}%;background:#38bdf8;opacity:.8"></div></div><span class="rs">${n.composite.toFixed(3)}</span></div>`;
+  });
+  h+=`</div>`;
+  document.getElementById('rankCont').innerHTML=h;
+}
+
+function buildPaths(){
+  const watch=['MCHP','NXPI','CDNS','ADSK','LRCX','NVDA','INTU','MAR'];
+  let h=`<div class="callout"><strong>Contagion paths — 90d network.</strong> Direct neighbors reprice in 1-3 sessions. 2-hop within 1-2 weeks if the move sustains. Orange = reports this week. MCHP is the master bridge — it connects semis, industrials, and consumer into one risk chain.</div>`;
+  watch.forEach(id=>{
+    const n=D.nodes.find(x=>x.id===id); if(!n) return;
+    let badge='';
+    if(topBoth.has(id)) badge='<span class="badge b-both">Both</span>';
+    else if(topB.has(id)) badge='<span class="badge b-btwn">Bridge</span>';
+    else if(topC.has(id)) badge='<span class="badge b-cent">Hub</span>';
+    const eb=EARN[id]?`<span class="badge b-earn">${EARN[id]}</span>`:'';
+    const twohop=[];
+    n.neighbors.forEach(nb=>{
+      const nn=D.nodes.find(x=>x.id===nb);
+      if(nn) nn.neighbors.forEach(x=>{ if(x!==id&&!n.neighbors.includes(x)) twohop.push({nn:x,via:nb}); });
+    });
+    const uniq=[...new Map(twohop.map(x=>[x.nn,x])).values()].slice(0,7);
+    const nbs=n.neighbors.map(nb=>`<span style="${EARN[nb]?'color:var(--orange)':'color:#38bdf8'};cursor:pointer" onclick="focusNode('${nb}')">${nb}</span>`).join(', ');
+    const th=uniq.map(x=>`<span style="${EARN[x.nn]?'color:var(--orange)':'color:var(--muted)'};cursor:pointer" onclick="focusNode('${x.nn}')">${x.nn}</span><span style="color:#334155"> via ${x.via}</span>`).join(', ');
+    h+=`<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:6px;flex-wrap:wrap">
+        <span style="font-family:'DM Mono',monospace;font-size:.8rem;font-weight:600;cursor:pointer" onclick="focusNode('${id}')">${id}</span>${badge}${eb}
+        <span style="font-size:.68rem;color:var(--muted);margin-left:auto">btwn ${n.betweenness.toFixed(3)}</span>
+      </div>
+      <div style="font-size:.71rem;color:var(--muted);margin-bottom:4px">Direct → ${nbs}</div>
+      ${uniq.length?`<div style="font-size:.68rem;color:var(--muted)">2-hop → ${th}</div>`:''}
+    </div>`;
+  });
+  document.getElementById('pathCont').innerHTML=h;
+}
+
+function buildWeek(){
+  const days=[
+    {label:'Tonight · Mon Apr 27',names:['CDNS'],note:'#5 betweenness in 90d window (0.421). Direct neighbors: ADSK, ALGN, SNPS. Watch these three Tuesday premarket — especially ADSK which is itself a top-6 bridge. A CDNS miss cascades: CDNS → ADSK → INTU → PAYX/WDAY.'},
+    {label:'Mon Apr 28 · After Close',names:['NXPI'],note:'#2 betweenness (0.521). Direct neighbors: MAR, MCHP, QCOM. MCHP is the #1 bridge — NXPI disappoints into MCHP, MCHP then propagates to its 6 direct neighbors: BKR, PCAR, SIRI, STX, TXN, and back to NXPI. This is the highest-risk single print of the week.'},
+    {label:'Wed Apr 29 · After Close',names:['MSFT','GOOGL','META','AMZN'],note:'Near-zero betweenness in 90d window — all four have decoupled from the network core. MSFT only neighbor is SNPS. GOOGL only neighbor is AMZN. These are directional market signals, not network contagion events. Watch as sentiment read, not chain reaction risk.'},
+    {label:'Thu Apr 30 · After Close',names:['AAPL'],note:'Near-zero betweenness (0.000). Only MST neighbor is CSX — a railroad. AAPL has completely decoupled from the tech/semis network in the 90d window. Pure sentiment and index-weight event, no network propagation expected.'},
+  ];
+  let h=`<div class="callout"><strong>90d network insight for this week:</strong> The real systemic risk runs through MCHP → NXPI → CDNS, not Mag-7. MSFT, GOOGL, AAPL are network periphery right now. NXPI reporting into MCHP as the #1 bridge is the highest-contagion print of the week.</div>`;
+  days.forEach(s=>{
+    const chips=s.names.map(nm=>{
+      const c=topBoth.has(nm)?'#fbbf24':topB.has(nm)?'#f472b6':topC.has(nm)?'#38bdf8':'#64748b';
+      return `<span style="font-family:'DM Mono',monospace;font-size:.76rem;font-weight:600;color:${c};cursor:pointer;padding:2px 7px;border:1px solid ${c}33;border-radius:4px;margin-right:4px" onclick="focusNode('${nm}')">${nm}</span>`;
+    }).join('');
+    h+=`<div class="day-block"><div class="day-label">${s.label}</div><div style="margin-bottom:6px">${chips}</div><div class="day-note">${s.note}</div></div>`;
+  });
+  document.getElementById('weekCont').innerHTML=h;
+}
+
+function sw(name){
+  ['inspect','rankings','paths','week'].forEach(t=>{
+    document.getElementById('p'+t.charAt(0).toUpperCase()+t.slice(1)).style.display=t===name?'block':'none';
+  });
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['inspect','rankings','paths','week'][i]===name));
+}
+
+function resize(){
+  const wrap=cv.parentElement;
+  W=wrap.clientWidth; H=wrap.clientHeight;
+  cv.width=W*devicePixelRatio; cv.height=H*devicePixelRatio;
+  cv.style.width=W+'px'; cv.style.height=H+'px';
+  ctx.scale(devicePixelRatio,devicePixelRatio);
+  draw();
+}
+
+window.addEventListener('resize',resize);
+buildRankings(); buildPaths(); buildWeek();
+resize();
+</script>
+</body>
+</html>
